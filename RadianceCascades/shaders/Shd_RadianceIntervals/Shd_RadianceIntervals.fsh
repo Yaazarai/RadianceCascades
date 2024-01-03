@@ -9,25 +9,24 @@ uniform vec2 in_Resolution;
 uniform sampler2D in_DistanceField;
 uniform sampler2D in_WorldScene;
 
-#define DECAYRATE 0.95 // Light absorption decay from implicit ray bounces: 0.85 - 0.95 optimal.
+#define DECAYRATE  0.95
 #define EPSILON  0.0001
 #define TAU      float(6.2831853071795864769252867665590)
 #define V2F16(v) ((v.y * float(0.0039215686274509803921568627451)) + v.x)
 
-vec3 raymarch(vec2 pix, vec2 dir, float steps, out vec2 endpoint) {
-	vec2 start = pix;
-	for(float dist = 0.0, i = 0.0; i < steps; i += 1.0, pix += dir * dist) {
-		vec2 sdf = texture2D(in_DistanceField, pix).rg;
-		endpoint = pix;
+vec3 raymarch(vec2 pos, vec2 dir, float range, out float raydist) {
+	range = range/length(in_Resolution);
+	vec2 aspect = vec2(in_Resolution.y / in_Resolution.x, 1.0 / (in_Resolution.y / in_Resolution.x));
+	pos *= vec2(aspect.x, 1.0);
+	
+	for(float d = 0.0, i = 0.0; i < range; i++) {
+		vec2 ray = (pos + (dir * raydist)) * vec2(aspect.y, 1.0);
+		raydist += d = V2F16(texture2D(in_DistanceField, ray).rg);
 		
-		float raydist = length(vec2(pix - start) * in_Resolution);
-		
-		if ((dist = V2F16(sdf)) < EPSILON || raydist >= steps) {
-			pix = start + (dir * min(raydist, steps)) * (1.0/in_Resolution);
-			endpoint = pix;
-			return texture2D(in_WorldScene, pix).rgb;
-		}
+		if (d <= EPSILON || raydist >= range)
+			return texture2D(in_WorldScene, ray).rgb;
 	}
+	
 	return vec3(0.0);
 }
 
@@ -42,15 +41,22 @@ void main() {
 	float count = interval * interval;
 	float index = (texel.y * interval) + texel.x;
 	float theta = TAU * ((index + 0.5) / count);
-	vec2 delta = vec2(cos(theta),-sin(theta));
+	vec2 delta = vec2(cos(theta), -sin(theta));
 	
 	vec2 ray = in_FragCoord * in_Resolution;
 	ray = (floor(ray / interval) * interval) + (interval * 0.5) + (delta * interval);
-	ray *= (1.0 / in_Resolution);
+	ray *= (1.0/in_Resolution);
 	
-	vec2 endpoint = vec2(ray);
-	vec3 emissive = raymarch(ray, delta, range, endpoint);
-	float raydist = length(endpoint - ray);
+	float raydist = 0.0;
+	vec3 emissive = raymarch(ray, delta, range, raydist);
 	emissive *= 1.0 / (1.0 + dot(raydist, raydist));
 	gl_FragColor = vec4(emissive, 1.0);
 }
+
+//
+// Cascade Prob Texel Space:
+//		gl_FragColor = vec4(texel/interval, 0.0, 1.0);
+//
+// Cascade Probe Emissive + Texel Space:
+//		gl_FragColor = vec4(texel/interval, 0.0, 1.0) + vec4(emissive, 1.0);
+//
