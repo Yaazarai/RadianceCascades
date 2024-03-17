@@ -1,26 +1,76 @@
-function rclight_defaultshaders(width, height) {
-	global.rclight_width = width;
-	global.rclight_height = height;
+function sampler(shd, id) { return shader_get_sampler_index(shd, id); }
+function uniform(shd, id) { return shader_get_uniform(shd, id); }
+function uniform_tx(id, surf) { texture_set_stage(id, surface_get_texture(surf)); }
+function uniform_f1(id, f1) { shader_set_uniform_f(id, f1); }
+function uniform_f2(id, f1, f2) { shader_set_uniform_f(id, f1, f2); }
+function multiple_of4(number) { return ( ( number + ( 4 - 1 ) ) & ~( 4 - 1 ) ); }
+function power_of4(number) { return power(4, ceil(logn(4, number))); }
+function power_of2(number) { return power(2, ceil(logn(2, number))); }
+
+function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.0) {
+	global.radiance_render_extent    = extent;              // extent resolution.. output resolution will be SQUARE.
+	global.radiance_cascade_angular  = power_of4(angular);  // angular resolution or initial rays per probe in cascade[0].
+	global.radiance_cascade_interval = multiple_of4(interval); // radiance interval or distance between radiance probes.
+	global.radiance_cascade_spacing  = power_of2(spacing);  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
+	global.radiance_cascade_extent   = floor(global.radiance_render_extent / global.radiance_cascade_spacing) * sqrt(global.radiance_cascade_angular);
+	global.radiance_cascade_count    = ceil(logn(2, global.radiance_cascade_extent / sqrt(global.radiance_cascade_angular)));
+	global.radiance_cascade_count    = min(floor(logn(4, global.radiance_render_extent)) - 1, global.radiance_cascade_count);
 	
-	global.rclight_jfaseeding = Shd_JumpfloodSeed;
-	global.rclight_jumpfloodalgorithm = Shd_JumpfloodAlgorithm;
-	global.rclight_distancefield = Shd_DistanceField;
-	
-	global.rclight_jumpfloodalgorithm_uResolution = shader_get_uniform(global.rclight_jumpfloodalgorithm, "in_Resolution");
-	global.rclight_jumpfloodalgorithm_uJumpDistance = shader_get_uniform(global.rclight_jumpfloodalgorithm, "in_JumpDistance");
-	global.rclight_distancefield_uResolution = shader_get_uniform(global.rclight_distancefield, "in_Resolution");
+	// Find Cascade count by maximum radiance interval.
+	// for(var i = 0; i < global.radiance_cascade_count; i++) {
+	// 	var max_interval = global.radiance_cascade_interval * power(4, i);
+	// 	if (max_interval > global.radiance_render_extent) {
+	// 		global.radiance_cascade_count = i;
+	// 		break;
+	// 	}
+	// }
 }
 
-function rclight_clear(surface) {
+function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, shd_merging, shd_mipmap) {
+	global.radiance_jfaseeding = jfaseed;
+	global.radiance_jumpfloodalgorithm = jumpflood;
+	global.radiance_distancefield = distfield;
+	global.radiance_intervals = shd_intervals;
+	global.radiance_merging = shd_merging;
+	global.radiance_mipmap = shd_mipmap;
+	
+	global.radiance_jumpfloodalgorithm_uRenderExtent = uniform(global.radiance_jumpfloodalgorithm, "in_RenderExtent");
+	global.radiance_jumpfloodalgorithm_uJumpDistance = uniform(global.radiance_jumpfloodalgorithm, "in_JumpDistance");
+	
+	global.radiance_intervals_uRenderExtent = uniform(global.radiance_intervals, "in_RenderExtent");
+	global.radiance_intervals_uDistanceField = sampler(global.radiance_intervals, "in_DistanceField");
+	global.radiance_intervals_uWorldScene = sampler(global.radiance_intervals, "in_WorldScene");
+	global.radiance_intervals_uCascadeExtent = uniform(global.radiance_intervals, "in_CascadeExtent");
+	global.radiance_intervals_uCascadeSpacing = uniform(global.radiance_intervals, "in_CascadeSpacing");
+	global.radiance_intervals_uCascadeInterval = uniform(global.radiance_intervals, "in_CascadeInterval");
+	global.radiance_intervals_uCascadeAngular = uniform(global.radiance_intervals, "in_CascadeAngular");
+	global.radiance_intervals_uCascadeIndex = uniform(global.radiance_intervals, "in_CascadeIndex");
+	
+	global.radiance_merging_uCascadeExtent = uniform(global.radiance_merging, "in_CascadeExtent");
+	global.radiance_merging_uCascadeSpacing = uniform(global.radiance_merging, "in_CascadeSpacing");
+	global.radiance_merging_uCascadeInterval = uniform(global.radiance_merging, "in_CascadeInterval");
+	global.radiance_merging_uCascadeAngular = uniform(global.radiance_merging, "in_CascadeAngular");
+	global.radiance_merging_uCascadeCount = uniform(global.radiance_merging, "in_CascadeCount");
+	global.radiance_merging_uCascadeIndex = uniform(global.radiance_merging, "in_CascadeIndex");
+	global.radiance_merging_uCascadeUpper = sampler(global.radiance_merging, "in_CascadeUpper");
+	
+	global.radiance_mipmap_uMipMapExtent = uniform(global.radiance_mipmap, "in_MipMapExtent");
+	global.radiance_mipmap_uCascadeExtent = uniform(global.radiance_mipmap, "in_CascadeExtent");
+	global.radiance_mipmap_uCascadeAngular = uniform(global.radiance_mipmap, "in_CascadeAngular");
+	global.radiance_mipmap_uCascadeIndex = uniform(global.radiance_mipmap, "in_CascadeIndex");
+	global.radiance_mipmap_uCascadeAtlas = sampler(global.radiance_mipmap, "in_CascadeAtlas");
+}
+
+function radiance_clear(surface) {
     surface_set_target(surface);
     draw_clear_alpha(c_black, 0);
     surface_reset_target();
 }
 
-function rclight_jfaseeding(init, jfaA, jfaB) {
+function radiance_jfaseed(init, jfaA, jfaB) {
     surface_set_target(jfaB);
     draw_clear_alpha(c_black, 0);
-    shader_set(global.rclight_jfaseeding);
+    shader_set(global.radiance_jfaseeding);
     draw_surface(init,0,0);
     shader_reset();
     surface_reset_target();
@@ -30,16 +80,16 @@ function rclight_jfaseeding(init, jfaA, jfaB) {
     surface_reset_target();
 }
 
-function rclight_jfarender(source, destination) {
-    var passes = ceil(log2(max(global.rclight_width, global.rclight_height)));
+function radiance_jumpflood(source, destination) {
+    var passes = ceil(log2(max(global.radiance_render_extent, global.radiance_render_extent)));
     
-    shader_set(global.rclight_jumpfloodalgorithm);
-    shader_set_uniform_f(global.rclight_jumpfloodalgorithm_uResolution, global.rclight_width, global.rclight_height);
+    shader_set(global.radiance_jumpfloodalgorithm);
+    shader_set_uniform_f(global.radiance_jumpfloodalgorithm_uRenderExtent, global.radiance_render_extent, global.radiance_render_extent);
 	
 	var tempA = source, tempB = destination, tempC = source;
     var i = 0; repeat(passes) {
         var offset = power(2, passes - i - 1);
-        shader_set_uniform_f(global.rclight_jumpfloodalgorithm_uJumpDistance, offset);
+        shader_set_uniform_f(global.radiance_jumpfloodalgorithm_uJumpDistance, offset);
         surface_set_target(tempA);
 			draw_surface(tempB,0,0);
         surface_reset_target();
@@ -58,12 +108,92 @@ function rclight_jfarender(source, destination) {
 	}
 }
 
-function rclight_distancefield(jfa, surface) {
+function radiance_distancefield(jfa, surface) {
     surface_set_target(surface);
     draw_clear_alpha(c_black, 0);
-    shader_set(global.rclight_distancefield);
-	shader_set_uniform_f(global.rclight_distancefield_uResolution, global.rclight_width, global.rclight_height);
+    shader_set(global.radiance_distancefield);
     draw_surface(jfa, 0, 0);
     shader_reset();
     surface_reset_target();
+}
+
+function radiancecascades_intervals(worldscene, distfield, cascade_surfarray, storage) {
+	if (is_array(cascade_surfarray)) {
+		for(var n = 0; n < global.radiance_cascade_count; n++) {
+			shader_set(global.radiance_intervals);
+			uniform_f1(global.radiance_intervals_uRenderExtent, global.radiance_render_extent);
+			uniform_tx(global.radiance_intervals_uDistanceField, distfield);
+			uniform_tx(global.radiance_intervals_uWorldScene, worldscene);
+			
+			uniform_f1(global.radiance_intervals_uCascadeExtent, global.radiance_cascade_extent);
+			uniform_f1(global.radiance_intervals_uCascadeSpacing, global.radiance_cascade_spacing);
+			uniform_f1(global.radiance_intervals_uCascadeInterval, global.radiance_cascade_interval);
+			uniform_f1(global.radiance_intervals_uCascadeAngular, global.radiance_cascade_angular);
+			uniform_f1(global.radiance_intervals_uCascadeIndex, n);
+			
+				surface_set_target(cascade_surfarray[n]);
+				draw_clear_alpha(c_black, 0);
+				// It doesn't matter what we render here, we just need a render source to set the render area size.
+				draw_surface(storage, 0, 0);
+				surface_reset_target();
+			
+			shader_reset();
+		}
+	}
+}
+
+function radiancecascades_merging(cascade_surfarray, cascade_temporary) {
+	if (is_array(cascade_surfarray)) {
+		for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
+			shader_set(global.radiance_merging);
+			uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
+			uniform_f1(global.radiance_merging_uCascadeSpacing, global.radiance_cascade_spacing);
+			uniform_f1(global.radiance_merging_uCascadeInterval, global.radiance_cascade_interval);
+			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
+			uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
+			uniform_f1(global.radiance_merging_uCascadeIndex, n);
+			
+			var cascaden1 = (n + 1) % global.radiance_cascade_count;
+			uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);
+			
+			surface_set_target(cascade_temporary);
+			draw_clear(c_black);
+			
+			// In this pass we're reading from cascade N+1 to merge cascade N with cascade N+1.
+			draw_surface(cascade_surfarray[n], 0, 0);
+			surface_reset_target();
+			shader_reset();
+			
+			// Copy from the tmeporary cascade surface to cascade N.
+			surface_set_target(cascade_surfarray[n]);
+			draw_clear(c_black);
+			draw_surface(cascade_temporary, 0, 0);
+			surface_reset_target();
+		}
+	}
+}
+
+function radiancecascades_mipmap(cascade_surfarray, mipmaps_surfarray) {
+	if (is_array(mipmaps_surfarray)) {
+		for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
+			var mipmap_width = surface_get_width(mipmaps_surfarray[n]);
+			var mipmap_height = surface_get_width(mipmaps_surfarray[n]);
+			var mipmap0_width = surface_get_width(mipmaps_surfarray[0]);
+			var mipmap0_height = surface_get_width(mipmaps_surfarray[0]);
+	
+			shader_set(global.radiance_mipmap);
+			uniform_f1(global.radiance_mipmap_uMipMapExtent, max(mipmap_width, mipmap_height));
+			uniform_f1(global.radiance_mipmap_uCascadeExtent, global.radiance_cascade_extent);
+			uniform_f1(global.radiance_mipmap_uCascadeAngular, global.radiance_cascade_angular);
+			uniform_f1(global.radiance_mipmap_uCascadeIndex, n);
+			uniform_tx(global.radiance_mipmap_uCascadeAtlas, cascade_surfarray[n]);
+	
+				surface_set_target(mipmaps_surfarray[n]);
+				draw_clear_alpha(c_black, 0.0);
+				draw_surface_ext(mipmaps_surfarray[0], 0, 0, mipmap_width/mipmap0_width, mipmap_height/mipmap0_height, 0, c_black,1);
+				surface_reset_target();
+	
+			shader_reset();
+		}
+	}
 }

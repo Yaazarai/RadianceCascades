@@ -1,7 +1,7 @@
 {
   "resourceType": "GMShader",
   "resourceVersion": "1.0",
-  "name": "Shd_RadianceCascades",
+  "name": "Shd_RadianceMipMap",
   "parent": {
     "name": "Shaders",
     "path": "folders/Shaders.yy",
