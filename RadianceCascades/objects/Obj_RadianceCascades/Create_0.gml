@@ -29,7 +29,7 @@ var width = 1024.0, height = 1024.0;
 // Passing 0 or less cascades will optimally calculate the number of required cascades.
 // Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
 // Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
-radiance_initialize(max(width, height), 16, 8, 2);
+radiance_initialize(max(width, height), 16, 8, 1);
 radiance_defaultshaders(Shd_JumpfloodSeed, Shd_JumpfloodAlgorithm, Shd_DistanceField, Shd_RadianceIntervals, Shd_RadianceMerging, Shd_RadianceMipMap);
 
 var bytes = 4.0 * sqr(global.radiance_cascade_extent) * global.radiance_cascade_count;
