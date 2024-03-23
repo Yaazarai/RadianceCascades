@@ -35,9 +35,14 @@ ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
 	float index = (probePos.y * size) + probePos.x;
 	
 	// Quadruples the Interval Range: (per specification, but not as smooth)
-	float minimum = (in_CascadeInterval * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
-	float range = (in_CascadeInterval * pow(4.0, cascade));
-	float maximum = minimum + range;
+	//float minimum = (in_CascadeInterval * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
+	//float range = (in_CascadeInterval * pow(4.0, cascade));
+	//float maximum = minimum + range;
+	
+	// Quadruples the INterval Range End-Points: (typical implementation)
+	float minimum = in_CascadeInterval * pow(4.0, cascade - 1.0);
+	float maximum = in_CascadeInterval * pow(4.0, cascade);
+	float range = maximum - minimum;
 	
 	float texel = 1.0 / in_RenderExtent;
 	return ProbeTexel(count, probe, spacing, index, minimum, maximum, range, texel/*, probePos / vec2(size)*/);
@@ -53,19 +58,23 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 	
 	//
 	// Ray Visibility Term: The A (Alpha Component) returns the transparency of this ray.
-	//	* A visibility term of 0.0 means this ray is fully opaque (object hit!).
+	//	* A visibility term of 0.0 means this ray is fully opaque (object hit).
 	//	* A visibility term of 1.0 means this ray is transparent (no hit).
 	//		When merging cascade rays with NO hits (1.0 visibility term) are the only
 	//		rays which will merge with above cascades. This applies merging/smoothing
 	//		of rays between cascade ranges to create those smooth shadows.
 	//
+	//	Interval Raymarching (raymarches a specific range away from probe):
+	//
 	for(float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++) {
 		vec2 ray = interval + delta * min(rd, rt);
 		rd += dd = V2F16(texture2D(in_DistanceField, ray).rg);
 		
+		// End of Interval Range or Out of Bounds:
 		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0)
 			return vec4(0.0, 0.0, 0.0, 1.0);
 		
+		// Surface/Object collision:
 		if (dd < EPSILON)
 			return vec4(texture2D(in_WorldScene, ray).rgb, 0.0);
 	}

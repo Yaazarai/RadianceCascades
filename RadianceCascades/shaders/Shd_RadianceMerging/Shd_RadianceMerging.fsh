@@ -60,7 +60,6 @@ void main() {
 		*/
 		
 		// This does the same as the above, unrolled and only uses one inteprolation.
-		
 		float thetaIndexN1_0 = (probeInfo.index * branch4) + 0.0;
 		float thetaIndexN1_1 = (probeInfo.index * branch4) + 1.0;
 		float thetaIndexN1_2 = (probeInfo.index * branch4) + 2.0;
@@ -86,7 +85,13 @@ void main() {
 		radianceBR += cascadeFetch(probeInfoN1, texelIndexN1+vec2(1.0,1.0), thetaIndexN1_2);
 		radianceBR += cascadeFetch(probeInfoN1, texelIndexN1+vec2(1.0,1.0), thetaIndexN1_3);
 		
+		// Per Specification:
+		//vec2 weight = vec2(0.25) + floor(vec2(probeInfo.probe) - texelIndexN1_N) * vec2(0.5);
+		
+		// Smoother Weights:
 		vec2 weight = vec2(0.33) + floor(vec2(probeInfo.probe) - texelIndexN1_N) * vec2(0.33);
+		
+		
 		vec4 interpolated = mix(mix(radianceTL, radianceTR, weight.x), mix(radianceBL, radianceBR, weight.x), weight.y);
 		radiance.rgb += radiance.a * interpolated.rgb;
 		radiance.a *= interpolated.a;
