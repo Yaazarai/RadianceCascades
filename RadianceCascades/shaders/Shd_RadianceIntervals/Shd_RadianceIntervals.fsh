@@ -36,10 +36,10 @@ ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
 	
 	// Quadruples the Interval Range: (per specification, but not as smooth)
 	float minimum = (in_CascadeInterval * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
-	float range = (in_CascadeInterval * pow(4.0, cascade));
+	float range = in_CascadeInterval * pow(4.0, cascade);
 	float maximum = minimum + range;
 	
-	// Quadruples the INterval Range End-Points: (typical implementation)
+	// Quadruples the Interval Range End-Points: (typical implementation)
 	//float minimum = in_CascadeInterval * pow(4.0, cascade - 1.0) * sign(cascade);
 	//float maximum = in_CascadeInterval * pow(4.0, cascade);
 	//float range = maximum - minimum;

@@ -19,7 +19,7 @@ function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.
 	
 	// Desired cascade count.
 	var diagonal = point_distance(0,0,extent,extent);
-	global.radiance_cascade_count    = min(floor(logn(4, 4.0 * diagonal)), global.radiance_cascade_count);
+	global.radiance_cascade_count    = min(floor(logn(4, 4.0 * diagonal))-1, global.radiance_cascade_count);
 	
 	// Find Cascade count by maximum radiance interval.
 	// for(var i = 0; i < global.radiance_cascade_count; i++) {
