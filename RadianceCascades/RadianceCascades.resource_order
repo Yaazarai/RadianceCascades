@@ -19,7 +19,6 @@
     {"name":"Timelines","order":8,"path":"folders/Timelines.yy",},
   ],
   "ResourceOrderSettings": [
-    {"name":"Shd_RadianceMergingOld","order":1,"path":"shaders/Shd_RadianceMergingOld/Shd_RadianceMergingOld.yy",},
     {"name":"Shd_JumpfloodSeed","order":1,"path":"shaders/Shd_JumpfloodSeed/Shd_JumpfloodSeed.yy",},
     {"name":"Shd_RadianceMipMap","order":6,"path":"shaders/Shd_RadianceMipMap/Shd_RadianceMipMap.yy",},
     {"name":"Shd_DistanceField","order":2,"path":"shaders/Shd_DistanceField/Shd_DistanceField.yy",},
@@ -28,7 +27,6 @@
     {"name":"Spr_SampleScene","order":1,"path":"sprites/Spr_SampleScene/Spr_SampleScene.yy",},
     {"name":"Obj_RadianceCascades","order":2,"path":"objects/Obj_RadianceCascades/Obj_RadianceCascades.yy",},
     {"name":"Spr_SampleSceneBright","order":3,"path":"sprites/Spr_SampleSceneBright/Spr_SampleSceneBright.yy",},
-    {"name":"Shd_RadianceIntervalsOld","order":2,"path":"shaders/Shd_RadianceIntervalsOld/Shd_RadianceIntervalsOld.yy",},
     {"name":"Scr_RadianceCascades","order":2,"path":"scripts/Scr_RadianceCascades/Scr_RadianceCascades.yy",},
     {"name":"Shd_RadianceMerging","order":5,"path":"shaders/Shd_RadianceMerging/Shd_RadianceMerging.yy",},
   ],

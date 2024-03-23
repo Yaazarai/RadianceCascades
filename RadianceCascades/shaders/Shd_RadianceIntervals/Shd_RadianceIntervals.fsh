@@ -11,8 +11,6 @@ uniform float in_CascadeIndex;    // Cascade index.
 
 #define EPSILON       0.0001
 #define TAU           6.2831853071795864769252867665590
-#define TONEMAP(c, d) (c * (1.0 / (1.0 + dot(d, d))))
-
 #define V2F16(v) ((v.y * float(0.0039215686274509803921568627451)) + v.x)
 
 struct ProbeTexel {
@@ -22,8 +20,9 @@ struct ProbeTexel {
 	float index;   // the theta-index of this texel in it's probe.
 	float minimum; // minimum interval-range.
 	float maximum; // maximum interval-range.
+	float range;   // maximum - minimum intervals.
 	float texel;   // texel size: 1.0 / cascadeExtent;
-	vec2 position; // cascade texel probe position.
+	//vec2 position; // cascade texel probe position.
 };
 
 ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
@@ -35,11 +34,13 @@ ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
 	vec2  probePos = mod(vec2(coord), vec2(size));
 	float index = (probePos.y * size) + probePos.x;
 	
-	float minimum = in_CascadeInterval * (pow(4.0, cascade - 1.0) * sign(cascade));
-	float maximum = in_CascadeInterval * pow(4.0, cascade);
-	float texel = 1.0 / in_RenderExtent;
+	// Quadruples the Interval Range: (per specification, but not as smooth)
+	float minimum = (in_CascadeInterval * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
+	float range = (in_CascadeInterval * pow(4.0, cascade));
+	float maximum = minimum + range;
 	
-	return ProbeTexel(count, probe, spacing, index, minimum, maximum, texel, probePos / vec2(size));
+	float texel = 1.0 / in_RenderExtent;
+	return ProbeTexel(count, probe, spacing, index, minimum, maximum, range, texel/*, probePos / vec2(size)*/);
 }
 
 vec4 marchInterval(ProbeTexel probeInfo) {
@@ -48,18 +49,28 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 	
 	float theta = TAU * ((probeInfo.index + 0.5) / probeInfo.count);
 	vec2 delta = vec2(cos(theta), -sin(theta));
-	
 	vec2 interval = probe + ((delta * probeInfo.minimum) * probeInfo.texel);
-	float range = probeInfo.maximum - probeInfo.minimum;
-	for(float ii = 0.0, dd = 0.0, rd = 0.0, rt = range * probeInfo.texel; ii < range; ii++) {
+	
+	//
+	// Ray Visibility Term: The A (Alpha Component) returns the transparency of this ray.
+	//	* A visibility term of 0.0 means this ray is fully opaque (object hit!).
+	//	* A visibility term of 1.0 means this ray is transparent (no hit).
+	//		When merging cascade rays with NO hits (1.0 visibility term) are the only
+	//		rays which will merge with above cascades. This applies merging/smoothing
+	//		of rays between cascade ranges to create those smooth shadows.
+	//
+	for(float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++) {
 		vec2 ray = interval + delta * min(rd, rt);
 		rd += dd = V2F16(texture2D(in_DistanceField, ray).rg);
 		
-		if (ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0) return vec4(0.0);
-		if (rd > rt || dd < EPSILON) return texture2D(in_WorldScene, ray);
+		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0)
+			return vec4(0.0, 0.0, 0.0, 1.0);
+		
+		if (dd < EPSILON)
+			return vec4(texture2D(in_WorldScene, ray).rgb, 0.0);
 	}
 	
-	return vec4(0.0);
+	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 void main() {
