@@ -1,5 +1,5 @@
-# RadianceCascades
-A 2D implementation of Radiance Cascades by Alexander Sannikov based on fad's implementation from Shadertoy.
+# RadianceCascades (WIP)
+A 2D implementation of Radiance Cascades by Alexander Sannikov based on fad's implementation from Shadertoy. Working demo of Radiance Cascades, still requires merging of cascade0 to screen space.
 
 Sources:
 * Radiance Cascades on [Shadertoy](https://www.shadertoy.com/view/mtlBzX) by fad.
