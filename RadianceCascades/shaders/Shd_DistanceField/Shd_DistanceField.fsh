@@ -1,7 +1,7 @@
 varying vec2 in_TextCoord;
 
-#define V2F16(v) ((v.y * float(0.0039215686274509803921568627451)) + v.x)
-#define F16V2(f) vec2(floor(f * 255.0) * float(0.0039215686274509803921568627451), fract(f * 255.0))
+#define V2F16(v) ((v.y * float(0.0039215689)) + v.x)
+#define F16V2(f) vec2(floor(f * 255.0) * float(0.0039215689), fract(f * 255.0))
 
 void main() {
     vec4 jfuv = texture2D(gm_BaseTexture, in_TextCoord);

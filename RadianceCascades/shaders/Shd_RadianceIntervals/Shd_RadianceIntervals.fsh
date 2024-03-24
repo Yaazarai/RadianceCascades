@@ -10,8 +10,8 @@ uniform float in_CascadeAngular;  // Cascade angular resolution.
 uniform float in_CascadeIndex;    // Cascade index.
 
 #define EPSILON       0.0001
-#define TAU           6.2831853071795864769252867665590
-#define V2F16(v) ((v.y * float(0.0039215686274509803921568627451)) + v.x)
+#define TAU           6.283185
+#define V2F16(v) ((v.y * float(0.0039215689)) + v.x)
 
 struct ProbeTexel {
 	float count;   // number of ray-directions in this probe.

@@ -2,7 +2,7 @@ varying vec2  in_TextCoord;
 uniform float in_JumpDistance;
 uniform float in_RenderExtent;
 
-#define V2F16(v) ((v.y * float(0.0039215686274509803921568627451)) + v.x)
+#define V2F16(v) ((v.y * float(0.0039215689)) + v.x)
 
 void main() {
 	vec2 offsets[9];

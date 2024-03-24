@@ -1,6 +1,6 @@
 varying vec2 in_TextCoord;
 
-#define F16V2(f) vec2(floor(f * 255.0) * float(0.0039215686274509803921568627451), fract(f * 255.0))
+#define F16V2(f) vec2(floor(f * 255.0) * float(0.0039215689), fract(f * 255.0))
 
 void main() {
     vec4 scene = texture2D(gm_BaseTexture, in_TextCoord);

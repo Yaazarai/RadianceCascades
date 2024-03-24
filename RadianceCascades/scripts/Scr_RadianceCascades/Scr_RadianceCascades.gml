@@ -10,7 +10,7 @@ function power_of2(number) { return power(2, ceil(logn(2, number))); }
 function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.0) {
 	global.radiance_render_extent    = extent;              // extent resolution.. output resolution will be SQUARE.
 	global.radiance_cascade_angular  = power_of4(angular);  // angular resolution or initial rays per probe in cascade[0].
-	global.radiance_cascade_interval = multiple_of4(interval); // radiance interval or distance between radiance probes.
+	global.radiance_cascade_interval = multiple_of4(interval); // radiance interval or raymarch distance of probes.
 	global.radiance_cascade_spacing  = power_of2(spacing);  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
 	global.radiance_cascade_extent   = floor(global.radiance_render_extent / global.radiance_cascade_spacing) * sqrt(global.radiance_cascade_angular);
 	
@@ -153,6 +153,7 @@ function radiancecascades_merging(cascade_surfarray, cascade_temporary) {
 			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
 			uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
 			uniform_f1(global.radiance_merging_uCascadeIndex, n);
+			uniform_f1(uniform(global.radiance_merging, "in_CascadeSpacing"), global.radiance_cascade_spacing);
 			
 			var cascaden1 = (n + 1) % global.radiance_cascade_count;
 			uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);

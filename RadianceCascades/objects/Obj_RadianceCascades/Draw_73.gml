@@ -31,4 +31,4 @@ xscale = global.radiance_render_extent / surface_get_width(gameworld_mipmaps[glo
 yscale = global.radiance_render_extent / surface_get_height(gameworld_mipmaps[global.showcascade]);
 draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
 
-draw_sprite_ext(Spr_SampleSceneBright, 0, 0, 0, 1, 1, 0, c_white, 1);
+//draw_sprite_ext(Spr_SampleSceneBright, 0, 0, 0, 1, 1, 0, c_white, 1);
