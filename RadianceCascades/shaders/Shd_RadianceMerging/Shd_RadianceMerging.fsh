@@ -65,5 +65,5 @@ void main() {
 		radiance.rgb /= branch4;
 	}
 	
-	gl_FragColor = vec4(radiance.rgb, 1.0);
+	gl_FragColor = radiance;
 }
