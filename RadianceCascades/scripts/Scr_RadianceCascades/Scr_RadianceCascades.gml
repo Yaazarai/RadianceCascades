@@ -153,7 +153,6 @@ function radiancecascades_merging(cascade_surfarray, cascade_temporary) {
 			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
 			uniform_f1(global.radiance_merging_uCascadeCount, global.radiance_cascade_count);
 			uniform_f1(global.radiance_merging_uCascadeIndex, n);
-			uniform_f1(uniform(global.radiance_merging, "in_CascadeSpacing"), global.radiance_cascade_spacing);
 			
 			var cascaden1 = (n + 1) % global.radiance_cascade_count;
 			uniform_tx(global.radiance_merging_uCascadeUpper, cascade_surfarray[cascaden1]);

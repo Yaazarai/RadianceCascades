@@ -23,7 +23,6 @@
     {"name":"Shd_JumpfloodAlgorithm","order":3,"path":"shaders/Shd_JumpfloodAlgorithm/Shd_JumpfloodAlgorithm.yy",},
     {"name":"Shd_RadianceIntervals","order":4,"path":"shaders/Shd_RadianceIntervals/Shd_RadianceIntervals.yy",},
     {"name":"Spr_SampleScene","order":1,"path":"sprites/Spr_SampleScene/Spr_SampleScene.yy",},
-    {"name":"Spr_SampleSceneBright","order":2,"path":"sprites/Spr_SampleSceneBright/Spr_SampleSceneBright.yy",},
     {"name":"Obj_RadianceCascades","order":2,"path":"objects/Obj_RadianceCascades/Obj_RadianceCascades.yy",},
     {"name":"Scr_RadianceCascades","order":2,"path":"scripts/Scr_RadianceCascades/Scr_RadianceCascades.yy",},
     {"name":"Shd_RadianceMerging","order":5,"path":"shaders/Shd_RadianceMerging/Shd_RadianceMerging.yy",},

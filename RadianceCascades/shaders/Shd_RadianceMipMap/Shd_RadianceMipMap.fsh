@@ -28,17 +28,14 @@ vec4 cascadeFetch(ProbeTexel info, vec2 texelIndex, float thetaIndex) {
 
 void main() {
 	// Get the mipmap's cascade texel info based on the cascade being rendered.
-	ProbeTexel texel = cascadeProbeTexel(in_CascadeIndex);
+	ProbeTexel probeInfo = cascadeProbeTexel(in_CascadeIndex);
 	vec2 mipmapCoord = floor(vec2(in_TextCoord * in_MipMapExtent));
 	
 	// Loops through all of the radiance intervals for this mip-map and accumulate.
 	vec4 radiance = vec4(0.0, 0.0, 0.0, 0.0);
-	for(float i = 0.0; i < texel.count; i ++) {
+	for(float i = 0.0; i < probeInfo.count; i ++)
 		// cascadeFetch uses the probe's cell index, which is the same as the mipmap's pixel position.
-		// Since the mipmap extent is equal to the number of probes in the cascade.
-		radiance += cascadeFetch(texel, mipmapCoord, i);
-	}
+		radiance += cascadeFetch(probeInfo, mipmapCoord, i);
 	
-	// Average all of the radiance intervals for this mipmap pixel/probe.
-	gl_FragColor = vec4(radiance.rgb / (float(texel.count) * 0.5), 1.0);
+	gl_FragColor = vec4(radiance.rgb / probeInfo.count, 1.0) * 2.0;
 }

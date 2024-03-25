@@ -41,7 +41,6 @@
     {"id":{"name":"Shd_JumpfloodAlgorithm","path":"shaders/Shd_JumpfloodAlgorithm/Shd_JumpfloodAlgorithm.yy",},},
     {"id":{"name":"Shd_RadianceIntervals","path":"shaders/Shd_RadianceIntervals/Shd_RadianceIntervals.yy",},},
     {"id":{"name":"Spr_SampleScene","path":"sprites/Spr_SampleScene/Spr_SampleScene.yy",},},
-    {"id":{"name":"Spr_SampleSceneBright","path":"sprites/Spr_SampleSceneBright/Spr_SampleSceneBright.yy",},},
     {"id":{"name":"Obj_RadianceCascades","path":"objects/Obj_RadianceCascades/Obj_RadianceCascades.yy",},},
     {"id":{"name":"Scr_RadianceCascades","path":"scripts/Scr_RadianceCascades/Scr_RadianceCascades.yy",},},
     {"id":{"name":"Shd_RadianceMerging","path":"shaders/Shd_RadianceMerging/Shd_RadianceMerging.yy",},},
