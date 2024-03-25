@@ -2,7 +2,10 @@ if (!surface_exists(gameworld_worldscene)) gameworld_worldscene = surface_create
 if (!surface_exists(gameworld_temporary)) gameworld_temporary = surface_create(global.radiance_render_extent, global.radiance_render_extent);
 if (!surface_exists(gameworld_jumpflood)) gameworld_jumpflood = surface_create(global.radiance_render_extent, global.radiance_render_extent);
 if (!surface_exists(gameworld_distancefield)) gameworld_distancefield = surface_create(global.radiance_render_extent, global.radiance_render_extent);
+
 if (!surface_exists(gameworld_radiance)) gameworld_radiance = surface_create(global.radiance_render_extent, global.radiance_render_extent);
+if (!surface_exists(gameworld_bouncescene)) gameworld_bouncescene = surface_create(global.radiance_render_extent, global.radiance_render_extent);
+
 if (!surface_exists(gameworld_storage)) gameworld_storage = surface_create(global.radiance_cascade_extent, global.radiance_cascade_extent);
 
 for(var i = 0; i < global.radiance_cascade_count; i++) {

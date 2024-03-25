@@ -2,6 +2,7 @@ varying vec2 in_TextCoord;
 uniform float     in_RenderExtent;  // Scren Space Resolution.
 uniform sampler2D in_DistanceField; // World Input Distance Field.
 uniform sampler2D in_WorldScene;    // World Input Raymarch Scene.
+uniform float in_RenderDecayRate;   // How quickly 
 
 uniform float in_CascadeExtent;   // Cascade Diagonal Resolution.
 uniform float in_CascadeSpacing;  // Cascade 0 probe spacing.
@@ -70,6 +71,7 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 	//
 	//	Interval Raymarching (raymarches a specific range away from probe):
 	//
+	float decay = min(max(0.5, in_RenderDecayRate), 1.0);
 	for(float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++) {
 		vec2 ray = interval + delta * min(rd, rt);
 		rd += dd = V2F16(texture2D(in_DistanceField, ray).rg);
@@ -78,7 +80,8 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0) return vec4(0.0, 0.0, 0.0, 1.0);
 		
 		// Surface/Object collision:
-		if (dd < EPSILON) return vec4(texture2D(in_WorldScene, ray).rgb, 0.0);
+		if (dd < EPSILON) return max(vec4(texture2D(in_WorldScene, ray).rgb, 0.0),
+			vec4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 0.0) * decay);
 	}
 	
 	return vec4(0.0, 0.0, 0.0, 1.0);

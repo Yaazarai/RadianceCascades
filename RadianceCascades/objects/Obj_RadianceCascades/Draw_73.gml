@@ -1,4 +1,11 @@
 // Disable blending for Jump Flood render processes (we don't care about alpha components here).
+surface_set_target(gameworld_bouncescene);
+draw_surface(gameworld_radiance, 0, 0);
+draw_set_color(c_white);
+draw_set_alpha(1.0);
+draw_surface(gameworld_worldscene, 0, 0);
+surface_reset_target();
+
 gpu_set_blendenable(false);
 gpu_set_texrepeat(false);
 
@@ -9,7 +16,7 @@ gpu_set_texrepeat(false);
 	radiance_clear(gameworld_storage);
 
 // Calculate initial Radiance Intervals.
-radiancecascades_intervals(gameworld_worldscene, gameworld_distancefield, gameworld_cascades, gameworld_storage);
+radiancecascades_intervals(gameworld_bouncescene, gameworld_distancefield, gameworld_cascades, gameworld_storage);
 
 // Merged Radiance Intervals from Cascades.
 radiancecascades_merging(gameworld_cascades, gameworld_storage);

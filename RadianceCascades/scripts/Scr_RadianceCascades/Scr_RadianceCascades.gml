@@ -7,8 +7,10 @@ function multiple_of2(number) { return ( ( number + ( 2 - 1 ) ) & ~( 2 - 1 ) ); 
 function power_of4(number) { return power(4, ceil(logn(4, number))); }
 function power_of2(number) { return power(2, ceil(logn(2, number))); }
 
-function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.0) {
+function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.0, boost = 1.0, decayrate = 0.65) {
 	global.radiance_render_extent    = extent;              // extent resolution.. output resolution will be SQUARE.
+	global.radiance_render_decay     = decayrate;           // How quickly light bounces decay.
+	global.radiance_render_boost     = boost;               // How much to boost light levels.
 	global.radiance_cascade_angular  = power_of4(angular);  // angular resolution or initial rays per probe in cascade[0].
 	global.radiance_cascade_interval = multiple_of2(interval); // radiance interval or raymarch distance of probes.
 	global.radiance_cascade_spacing  = power_of2(spacing);  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
@@ -44,6 +46,7 @@ function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, s
 	global.radiance_jumpfloodalgorithm_uJumpDistance = uniform(global.radiance_jumpfloodalgorithm, "in_JumpDistance");
 	
 	global.radiance_intervals_uRenderExtent = uniform(global.radiance_intervals, "in_RenderExtent");
+	global.radiance_intervals_uRenderDecayRate = uniform(global.radiance_intervals, "in_RenderDecayRate");
 	global.radiance_intervals_uDistanceField = sampler(global.radiance_intervals, "in_DistanceField");
 	global.radiance_intervals_uWorldScene = sampler(global.radiance_intervals, "in_WorldScene");
 	global.radiance_intervals_uCascadeExtent = uniform(global.radiance_intervals, "in_CascadeExtent");
@@ -65,6 +68,7 @@ function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, s
 	global.radiance_mipmap_uCascadeAtlas = sampler(global.radiance_mipmap, "in_CascadeAtlas");
 	
 	global.radiance_screenmerge_uRenderExtent = uniform(global.radiance_screenmerge, "in_RenderExtent");
+	global.radiance_screenmerge_uRenderBoost = uniform(global.radiance_screenmerge, "in_RenderBoost");
 	global.radiance_screenmerge_uMipMapExtent = uniform(global.radiance_screenmerge, "in_MipMapExtent");
 	global.radiance_screenmerge_uMipMapAtlas = sampler(global.radiance_screenmerge, "in_MipMapAtlas");
 }
@@ -130,6 +134,7 @@ function radiancecascades_intervals(worldscene, distfield, cascade_surfarray, st
 		for(var n = 0; n < global.radiance_cascade_count; n++) {
 			shader_set(global.radiance_intervals);
 			uniform_f1(global.radiance_intervals_uRenderExtent, global.radiance_render_extent);
+			uniform_f1(global.radiance_intervals_uRenderDecayRate, global.radiance_render_decay);
 			uniform_tx(global.radiance_intervals_uDistanceField, distfield);
 			uniform_tx(global.radiance_intervals_uWorldScene, worldscene);
 			
@@ -209,6 +214,7 @@ function radiancecascades_screenmerge(screen, screen_temp, mipmaps_surfarray) {
 	
 		shader_set(global.radiance_screenmerge);
 		uniform_f1(global.radiance_screenmerge_uRenderExtent, global.radiance_render_extent);
+		uniform_f1(global.radiance_screenmerge_uRenderBoost, global.radiance_render_boost);
 		uniform_f1(global.radiance_screenmerge_uMipMapExtent, max(mipmap_width, mipmap_height));
 		uniform_tx(global.radiance_screenmerge_uMipMapAtlas, mipmaps_surfarray[global.showcascade]);
 	

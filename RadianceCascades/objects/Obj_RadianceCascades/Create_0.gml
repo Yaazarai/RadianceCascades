@@ -30,7 +30,7 @@ var width = 1024.0, height = 1024.0;
 // Passing 0 or less cascades will optimally calculate the number of required cascades.
 // Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
 // Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
-radiance_initialize(max(width, height), 4, 4, 2);
+radiance_initialize(max(width, height), 4, 4, 2, 1.5, 0.90);
 radiance_defaultshaders(Shd_JumpfloodSeed, Shd_JumpfloodAlgorithm, Shd_DistanceField, Shd_RadianceIntervals, Shd_RadianceMerging, Shd_RadianceMipMap, Shd_RadianceScreenMerge);
 
 var bytes = 4.0 * sqr(global.radiance_cascade_extent) * global.radiance_cascade_count;
@@ -47,7 +47,9 @@ gameworld_worldscene = INVALID_SURFACE;
 gameworld_temporary = INVALID_SURFACE;
 gameworld_jumpflood = INVALID_SURFACE;
 gameworld_distancefield = INVALID_SURFACE;
+
 gameworld_radiance = INVALID_SURFACE;
+gameworld_bouncescene = INVALID_SURFACE;
 
 gameworld_storage = INVALID_SURFACE;
 for(var i = 0; i < global.radiance_cascade_count + 1; i++) {

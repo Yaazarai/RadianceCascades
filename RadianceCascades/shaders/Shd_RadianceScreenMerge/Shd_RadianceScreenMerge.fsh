@@ -1,5 +1,6 @@
 varying vec2 in_TextCoord;
 uniform float in_RenderExtent;    // Screen Diaognal Resolution.
+uniform float in_RenderBoost;     // Brightness Boost Factor.
 uniform float in_MipMapExtent;    // Cascade Diagonal Resolution.
 uniform sampler2D in_MipMapAtlas; // Cascade Upper (N+1).
 
@@ -20,5 +21,5 @@ void main() {
 	
 	vec2 weight = mod(pixelCoord, cellSize) / cellSize;
 	vec4 interpolated = mix(mix(TL, TR, weight.x), mix(BL, BR, weight.x), weight.y);
-	gl_FragColor = interpolated;
+	gl_FragColor = interpolated * in_RenderBoost;
 }
