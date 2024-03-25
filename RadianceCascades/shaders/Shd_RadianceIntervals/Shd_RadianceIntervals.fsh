@@ -35,12 +35,16 @@ ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
 	float index = (probePos.y * size) + probePos.x;
 	
 	// Quadruples the Interval Range: (per specification, but not as smooth)
-	float minimum = (in_CascadeInterval * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
+	float minimum = (in_CascadeInterval  * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
+		// Forces overlap between N and N-1 radiance intervals.
+		minimum -= ((in_CascadeInterval * (1.0 - pow(4.0, cascade-1.0)*sign(cascade-1.0))) / (1.0 - 4.0));
 	float range = in_CascadeInterval * pow(4.0, cascade);
 	float maximum = minimum + range;
 	
 	// Quadruples the Interval Range End-Points: (typical implementation)
 	//float minimum = in_CascadeInterval * pow(4.0, cascade - 1.0) * sign(cascade);
+		// Forces overlap between N and N-1 radiance intervals.
+		//minimum -= in_CascadeInterval * pow(4.0, cascade - 2.0) * sign(cascade-1.0);
 	//float maximum = in_CascadeInterval * pow(4.0, cascade);
 	//float range = maximum - minimum;
 	
