@@ -16,6 +16,9 @@ radiancecascades_merging(gameworld_cascades, gameworld_storage);
 // Generate Cascade[N] mip-map (debugging visualization).
 radiancecascades_mipmap(gameworld_cascades, gameworld_mipmaps);
 
+// Generate Screen Radiance from Merged Cascade mip-map.
+radiancecascades_screenmerge(gameworld_radiance, gameworld_temporary, gameworld_mipmaps);
+
 // Re-Enable Alpha Blending since the Jump Flood pass is complete.
 gpu_set_blendenable(true);
 
@@ -29,4 +32,6 @@ var yscale = global.radiance_render_extent / global.radiance_cascade_extent;
 
 xscale = global.radiance_render_extent / surface_get_width(gameworld_mipmaps[global.showcascade]);
 yscale = global.radiance_render_extent / surface_get_height(gameworld_mipmaps[global.showcascade]);
-draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
+//draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
+
+draw_surface(gameworld_radiance, 0, 0);

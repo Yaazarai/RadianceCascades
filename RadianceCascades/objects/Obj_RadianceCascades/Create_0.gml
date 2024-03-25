@@ -14,8 +14,9 @@
 	of the shadow (how blurry it is) is sharper closer to light sources and
 	blurrier further from light sources. Neat!
 	
-	By default this implementation uses quadrupling for ray counts between
-	cascades. If cascade0 has 16 rays, cascade1 has 64, then 256 and so on.
+	By default this implementation uses quadrupling for ray counts and probes
+	between cascades. If cascade0 has 16 rays and 256 probes, cascade1 has 64
+	rays and 64 probes, then 256 rays and 16 probes and so on.
 	
 	Shader Passes:
 		1. Cascades (Raymarches the probes in each cascade).
@@ -29,8 +30,8 @@ var width = 1024.0, height = 1024.0;
 // Passing 0 or less cascades will optimally calculate the number of required cascades.
 // Parameters: [angular] is power of 4, [interval] is multiple of 4, [spacing] is power of 2.
 // Any value passed that does not conform to these rules will be automatically adjusted (adjusted up).
-radiance_initialize(max(width, height), 4, 4, 1);
-radiance_defaultshaders(Shd_JumpfloodSeed, Shd_JumpfloodAlgorithm, Shd_DistanceField, Shd_RadianceIntervals, Shd_RadianceMerging, Shd_RadianceMipMap);
+radiance_initialize(max(width, height), 4, 2, 2);
+radiance_defaultshaders(Shd_JumpfloodSeed, Shd_JumpfloodAlgorithm, Shd_DistanceField, Shd_RadianceIntervals, Shd_RadianceMerging, Shd_RadianceMipMap, Shd_RadianceScreenMerge);
 
 var bytes = 4.0 * sqr(global.radiance_cascade_extent) * global.radiance_cascade_count;
 show_debug_message("\nRender  Diagonal: {0}", string(global.radiance_render_extent));

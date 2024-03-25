@@ -3,14 +3,14 @@ function uniform(shd, id) { return shader_get_uniform(shd, id); }
 function uniform_tx(id, surf) { texture_set_stage(id, surface_get_texture(surf)); }
 function uniform_f1(id, f1) { shader_set_uniform_f(id, f1); }
 function uniform_f2(id, f1, f2) { shader_set_uniform_f(id, f1, f2); }
-function multiple_of4(number) { return ( ( number + ( 4 - 1 ) ) & ~( 4 - 1 ) ); }
+function multiple_of2(number) { return ( ( number + ( 2 - 1 ) ) & ~( 2 - 1 ) ); }
 function power_of4(number) { return power(4, ceil(logn(4, number))); }
 function power_of2(number) { return power(2, ceil(logn(2, number))); }
 
 function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.0) {
 	global.radiance_render_extent    = extent;              // extent resolution.. output resolution will be SQUARE.
 	global.radiance_cascade_angular  = power_of4(angular);  // angular resolution or initial rays per probe in cascade[0].
-	global.radiance_cascade_interval = multiple_of4(interval); // radiance interval or raymarch distance of probes.
+	global.radiance_cascade_interval = multiple_of2(interval); // radiance interval or raymarch distance of probes.
 	global.radiance_cascade_spacing  = power_of2(spacing);  // Initial probe spacing of cascade0, each next cascade is N*4.0 spacing.
 	global.radiance_cascade_extent   = floor(global.radiance_render_extent / global.radiance_cascade_spacing) * sqrt(global.radiance_cascade_angular);
 	
@@ -31,13 +31,14 @@ function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.
 	// }
 }
 
-function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, shd_merging, shd_mipmap) {
+function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, shd_merging, shd_mipmap, shd_screenmerge) {
 	global.radiance_jfaseeding = jfaseed;
 	global.radiance_jumpfloodalgorithm = jumpflood;
 	global.radiance_distancefield = distfield;
 	global.radiance_intervals = shd_intervals;
 	global.radiance_merging = shd_merging;
 	global.radiance_mipmap = shd_mipmap;
+	global.radiance_screenmerge = shd_screenmerge;
 	
 	global.radiance_jumpfloodalgorithm_uRenderExtent = uniform(global.radiance_jumpfloodalgorithm, "in_RenderExtent");
 	global.radiance_jumpfloodalgorithm_uJumpDistance = uniform(global.radiance_jumpfloodalgorithm, "in_JumpDistance");
@@ -62,6 +63,10 @@ function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, s
 	global.radiance_mipmap_uCascadeAngular = uniform(global.radiance_mipmap, "in_CascadeAngular");
 	global.radiance_mipmap_uCascadeIndex = uniform(global.radiance_mipmap, "in_CascadeIndex");
 	global.radiance_mipmap_uCascadeAtlas = sampler(global.radiance_mipmap, "in_CascadeAtlas");
+	
+	global.radiance_screenmerge_uRenderExtent = uniform(global.radiance_screenmerge, "in_RenderExtent");
+	global.radiance_screenmerge_uMipMapExtent = uniform(global.radiance_screenmerge, "in_MipMapExtent");
+	global.radiance_screenmerge_uMipMapAtlas = sampler(global.radiance_screenmerge, "in_MipMapAtlas");
 }
 
 function radiance_clear(surface) {
@@ -193,6 +198,25 @@ function radiancecascades_mipmap(cascade_surfarray, mipmaps_surfarray) {
 			draw_surface_ext(mipmaps_surfarray[0], 0, 0, mipmap_width/mipmap0_width, mipmap_height/mipmap0_height, 0, c_black,1);
 			surface_reset_target();
 	
+		shader_reset();
+	}
+}
+
+function radiancecascades_screenmerge(screen, screen_temp, mipmaps_surfarray) {
+	if (is_array(mipmaps_surfarray)) {
+		var mipmap_width = surface_get_width(mipmaps_surfarray[global.showcascade]);
+		var mipmap_height = surface_get_width(mipmaps_surfarray[global.showcascade]);
+	
+		shader_set(global.radiance_screenmerge);
+		uniform_f1(global.radiance_screenmerge_uRenderExtent, global.radiance_render_extent);
+		uniform_f1(global.radiance_screenmerge_uMipMapExtent, max(mipmap_width, mipmap_height));
+		uniform_tx(global.radiance_screenmerge_uMipMapAtlas, mipmaps_surfarray[global.showcascade]);
+	
+		surface_set_target(screen);
+		draw_clear_alpha(c_black, 0);
+		draw_surface(screen_temp, 0.0, 0.0);
+		surface_reset_target();
+		
 		shader_reset();
 	}
 }

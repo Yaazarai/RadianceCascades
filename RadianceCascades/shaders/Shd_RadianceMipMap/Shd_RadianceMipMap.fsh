@@ -37,5 +37,5 @@ void main() {
 		// cascadeFetch uses the probe's cell index, which is the same as the mipmap's pixel position.
 		radiance += cascadeFetch(probeInfo, mipmapCoord, i);
 	
-	gl_FragColor = vec4(radiance.rgb / probeInfo.count, 1.0) * 2.0;
+	gl_FragColor = vec4(radiance.rgb / probeInfo.count, 1.0);
 }
