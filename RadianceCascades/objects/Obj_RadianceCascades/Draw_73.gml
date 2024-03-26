@@ -35,11 +35,11 @@ gpu_set_blendenable(true);
 //draw_surface(gameworld_distancefield, 0, 0);
 draw_surface(gameworld_radiance, 0, 0);
 
-var xscale = global.radiance_render_extent / global.radiance_cascade_extent;
-var yscale = global.radiance_render_extent / global.radiance_cascade_extent;
+//var xscale = global.radiance_render_extent / global.radiance_cascade_extent;
+//var yscale = global.radiance_render_extent / global.radiance_cascade_extent;
 //draw_surface_ext(gameworld_cascades[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
 
 //xscale = global.radiance_render_extent / surface_get_width(gameworld_mipmaps[global.showcascade]);
 //yscale = global.radiance_render_extent / surface_get_height(gameworld_mipmaps[global.showcascade]);
 //gpu_set_tex_mip_filter(tf_linear);
-//draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, 1, 1, 0, c_white, 1);
+//draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
