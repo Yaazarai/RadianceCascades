@@ -16,8 +16,8 @@ uniform float in_CascadeIndex;    // Cascade index.
 
 struct ProbeTexel {
 	float count;   // number of ray-directions in this probe.
-	ivec2 probe;   // the cell index of this probe.
-	ivec2 spacing; // spacing between radiance probes.
+	vec2 probe;   // the cell index of this probe.
+	vec2 spacing; // spacing between radiance probes.
 	float index;   // the theta-index of this texel in it's probe.
 	float minimum; // minimum interval-range.
 	float maximum; // maximum interval-range.
@@ -26,19 +26,17 @@ struct ProbeTexel {
 	//vec2 position; // cascade texel probe position.
 };
 
-ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
+ProbeTexel cascadeProbeTexel(vec2 coord, float cascade) {
 	float count = in_CascadeAngular * pow(4.0, cascade);
 	float size = sqrt(count);
-	ivec2 probe = coord / ivec2(size);
-	ivec2 spacing = ivec2(in_CascadeSpacing * pow(2.0, cascade));
+	vec2 probe = floor(coord / vec2(size));
+	vec2 spacing = vec2(in_CascadeSpacing * pow(2.0, cascade));
 	
-	vec2  probePos = mod(vec2(coord), vec2(size));
+	vec2  probePos = mod(floor(coord), vec2(size));
 	float index = (probePos.y * size) + probePos.x;
 	
 	// Quadruples the Interval Range: (per specification, but not as smooth)
 	float minimum = (in_CascadeInterval  * (1.0 - pow(4.0, cascade))) / (1.0 - 4.0);
-		// Forces overlap between N and N-1 radiance intervals.
-		minimum -= ((in_CascadeInterval * (1.0 - pow(4.0, cascade-1.0)*sign(cascade-1.0))) / (1.0 - 4.0));
 	float range = in_CascadeInterval * pow(4.0, cascade);
 	float maximum = minimum + range;
 	
@@ -54,7 +52,7 @@ ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
 }
 
 vec4 marchInterval(ProbeTexel probeInfo) {
-	vec2 probe = vec2((probeInfo.probe * probeInfo.spacing) + probeInfo.spacing) + 0.5;
+	vec2 probe = vec2((probeInfo.probe+0.5) * probeInfo.spacing);
 	probe *= probeInfo.texel;
 	
 	float theta = TAU * ((probeInfo.index + 0.5) / probeInfo.count);
@@ -71,7 +69,7 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 	//
 	//	Interval Raymarching (raymarches a specific range away from probe):
 	//
-	float decay = min(max(0.5, in_RenderDecayRate), 1.0);
+	float decay = min(max(0.0, in_RenderDecayRate), 1.0);
 	for(float ii = 0.0, dd = 0.0, rd = 0.0, rt = probeInfo.range * probeInfo.texel; ii < probeInfo.range; ii++) {
 		vec2 ray = interval + delta * min(rd, rt);
 		rd += dd = V2F16(texture2D(in_DistanceField, ray).rg);
@@ -80,15 +78,15 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0) return vec4(0.0, 0.0, 0.0, 1.0);
 		
 		// Surface/Object collision:
-		if (dd < EPSILON) return max(vec4(texture2D(in_WorldScene, ray).rgb, 0.0),
-			vec4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 0.0) * decay);
+		if (dd < EPSILON) return max(vec4(texture2D(in_WorldScene, ray).rgb, 0.0), vec4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 0.0) * decay);
+		//if (dd < EPSILON) return vec4(texture2D(in_WorldScene, ray).rgb, 0.0);
 	}
 	
 	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 void main() {
-	ivec2 texel = ivec2(in_TextCoord * vec2(in_CascadeExtent));
+	vec2 texel = in_TextCoord * vec2(in_CascadeExtent);
 	ProbeTexel probeInfo = cascadeProbeTexel(texel, in_CascadeIndex);
 	gl_FragColor = marchInterval(probeInfo);
 }

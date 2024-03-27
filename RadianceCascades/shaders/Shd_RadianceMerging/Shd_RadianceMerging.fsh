@@ -10,15 +10,15 @@ struct ProbeTexel {
 	float size;
 	float index;
 	vec2 texel;
-	ivec2 probe;
+	vec2 probe;
 };
 
-ProbeTexel cascadeProbeTexel(ivec2 coord, float cascade) {
+ProbeTexel cascadeProbeTexel(vec2 coord, float cascade) {
 	float count = in_CascadeAngular * pow(4.0, cascade);
 	float size = sqrt(count);
-	vec2  texel = mod(vec2(coord), vec2(size));
-	float index = floor((texel.y * size) + texel.x);
-	ivec2 probe = coord / ivec2(size);
+	vec2  texel = mod(floor(coord), vec2(size));
+	float index = (texel.y * size) + texel.x;
+	vec2 probe = floor(coord / vec2(size));
 	return ProbeTexel(count, size, index, texel, probe);
 }
 
@@ -30,7 +30,7 @@ vec4 cascadeFetch(ProbeTexel info, vec2 texelIndex, float thetaIndex) {
 }
 
 void main() {
-	ivec2 cascadeCoord = ivec2(in_TextCoord * in_CascadeExtent);
+	vec2 cascadeCoord = in_TextCoord * in_CascadeExtent;
 	ProbeTexel probeInfo = cascadeProbeTexel(cascadeCoord, in_CascadeIndex);
 	ProbeTexel probeInfoN1 = cascadeProbeTexel(cascadeCoord, in_CascadeIndex + 1.0);
 	
