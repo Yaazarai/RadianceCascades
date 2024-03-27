@@ -3,9 +3,7 @@ A 2D implementation of Radiance Cascades by Alexander Sannikov based on fad's im
 
 Running the demo there are controls: _**up/down arrows**_ to change cascade mip-maps, _**left/right arrows**_ to change the cascade zero interval distance.
 
-<p align="center">
-  <img width="512" height="512" src="https://github.com/Yaazarai/RadianceCascades/assets/7478702/1e0f1abf-f104-46bf-a04e-3d1abb49787f">
-</p>
+https://github.com/Yaazarai/RadianceCascades/assets/7478702/3949e693-b23f-4054-a00e-dd22bf2f0cfb
 
 Sources:
 * Radiance Cascades on [Shadertoy](https://www.shadertoy.com/view/mtlBzX) by fad.
