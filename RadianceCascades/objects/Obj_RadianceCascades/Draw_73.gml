@@ -25,7 +25,7 @@ radiancecascades_merging(gameworld_cascades, gameworld_storage);
 radiancecascades_mipmap(gameworld_cascades, gameworld_mipmaps);
 
 // Generate Screen Radiance from Merged Cascade mip-map.
-radiancecascades_screenmerge(gameworld_radiance, gameworld_temporary, gameworld_mipmaps);
+//radiancecascades_screenmerge(gameworld_radiance, gameworld_temporary, gameworld_mipmaps);
 
 // Re-Enable Alpha Blending since the Jump Flood pass is complete.
 gpu_set_blendenable(true);
@@ -39,7 +39,15 @@ draw_surface(gameworld_radiance, 0, 0);
 //var yscale = global.radiance_render_extent / global.radiance_cascade_extent;
 //draw_surface_ext(gameworld_cascades[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
 
-//xscale = global.radiance_render_extent / surface_get_width(gameworld_mipmaps[global.showcascade]);
-//yscale = global.radiance_render_extent / surface_get_height(gameworld_mipmaps[global.showcascade]);
-//gpu_set_tex_mip_filter(tf_linear);
-//draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1);
+surface_set_target(gameworld_radiance);
+draw_clear_alpha(c_black, 0);
+gpu_set_blendmode(bm_add);
+var xscale = global.radiance_render_extent / surface_get_width(gameworld_mipmaps[global.showcascade]);
+var yscale = global.radiance_render_extent / surface_get_height(gameworld_mipmaps[global.showcascade]);
+gpu_set_tex_mip_filter(tf_linear);
+draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 1.0);
+draw_surface_ext(gameworld_mipmaps[global.showcascade], 0, 0, xscale, yscale, 0, c_white, 0.5);
+gpu_set_blendmode(bm_normal);
+surface_reset_target();
+
+draw_surface(gameworld_radiance, 0, 0);
