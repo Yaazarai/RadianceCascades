@@ -75,14 +75,14 @@ vec4 marchInterval(ProbeTexel probeInfo) {
 		rd += dd = V2F16(texture2D(in_DistanceField, ray).rg);
 		
 		// End of Interval Range or Out of Bounds:
-		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0) return vec4(0.0, 0.0, 0.0, 1.0);
+		if (rd >= rt || ray.x < 0.0 || ray.y < 0.0 || ray.x >= 1.0 || ray.y >= 1.0) return vec4(0.0, 0.0, 0.0, 0.0);
 		
 		// Surface/Object collision:
-		if (dd < EPSILON) return max(vec4(texture2D(in_WorldScene, ray).rgb, 0.0), vec4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 0.0) * decay);
-		//if (dd < EPSILON) return vec4(texture2D(in_WorldScene, ray).rgb, 0.0);
+		//if (dd < EPSILON) return max(vec4(texture2D(in_WorldScene, ray).rgb, 1.0), vec4(texture2D(in_WorldScene, ray - (delta * probeInfo.texel)).rgb, 1.0) * decay);
+		if (dd < EPSILON) return vec4(texture2D(in_WorldScene, ray).rgb, 1.0);
 	}
 	
-	return vec4(0.0, 0.0, 0.0, 1.0);
+	return vec4(0.0, 0.0, 0.0, 0.0);
 }
 
 void main() {

@@ -33,14 +33,13 @@ function radiance_initialize(extent, angular = 4.0, interval = 4.0, spacing = 4.
 	// }
 }
 
-function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, shd_merging, shd_mipmap, shd_screenmerge) {
+function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, shd_merging, shd_mipmap) {
 	global.radiance_jfaseeding = jfaseed;
 	global.radiance_jumpfloodalgorithm = jumpflood;
 	global.radiance_distancefield = distfield;
 	global.radiance_intervals = shd_intervals;
 	global.radiance_merging = shd_merging;
 	global.radiance_mipmap = shd_mipmap;
-	global.radiance_screenmerge = shd_screenmerge;
 	
 	global.radiance_jumpfloodalgorithm_uRenderExtent = uniform(global.radiance_jumpfloodalgorithm, "in_RenderExtent");
 	global.radiance_jumpfloodalgorithm_uJumpDistance = uniform(global.radiance_jumpfloodalgorithm, "in_JumpDistance");
@@ -66,11 +65,6 @@ function radiance_defaultshaders(jfaseed, jumpflood, distfield, shd_intervals, s
 	global.radiance_mipmap_uCascadeAngular = uniform(global.radiance_mipmap, "in_CascadeAngular");
 	global.radiance_mipmap_uCascadeIndex = uniform(global.radiance_mipmap, "in_CascadeIndex");
 	global.radiance_mipmap_uCascadeAtlas = sampler(global.radiance_mipmap, "in_CascadeAtlas");
-	
-	global.radiance_screenmerge_uRenderExtent = uniform(global.radiance_screenmerge, "in_RenderExtent");
-	global.radiance_screenmerge_uRenderBoost = uniform(global.radiance_screenmerge, "in_RenderBoost");
-	global.radiance_screenmerge_uMipMapExtent = uniform(global.radiance_screenmerge, "in_MipMapExtent");
-	global.radiance_screenmerge_uMipMapAtlas = sampler(global.radiance_screenmerge, "in_MipMapAtlas");
 }
 
 function radiance_clear(surface) {
@@ -157,7 +151,7 @@ function radiancecascades_intervals(worldscene, distfield, cascade_surfarray, st
 
 function radiancecascades_merging(cascade_surfarray, cascade_temporary) {
 	if (is_array(cascade_surfarray)) {
-		for(var n = global.radiance_cascade_count - 2; n >= 0; n--) {
+		for(var n = global.radiance_cascade_count - 1; n >= 0; n--) {
 			shader_set(global.radiance_merging);
 			uniform_f1(global.radiance_merging_uCascadeExtent, global.radiance_cascade_extent);
 			uniform_f1(global.radiance_merging_uCascadeAngular, global.radiance_cascade_angular);
@@ -203,26 +197,6 @@ function radiancecascades_mipmap(cascade_surfarray, mipmaps_surfarray) {
 			draw_surface_ext(mipmaps_surfarray[0], 0, 0, mipmap_width/mipmap0_width, mipmap_height/mipmap0_height, 0, c_black,1);
 			surface_reset_target();
 	
-		shader_reset();
-	}
-}
-
-function radiancecascades_screenmerge(screen, screen_temp, mipmaps_surfarray) {
-	if (is_array(mipmaps_surfarray)) {
-		var mipmap_width = surface_get_width(mipmaps_surfarray[global.showcascade]);
-		var mipmap_height = surface_get_width(mipmaps_surfarray[global.showcascade]);
-	
-		shader_set(global.radiance_screenmerge);
-		uniform_f1(global.radiance_screenmerge_uRenderExtent, global.radiance_render_extent);
-		uniform_f1(global.radiance_screenmerge_uRenderBoost, global.radiance_render_boost);
-		uniform_f1(global.radiance_screenmerge_uMipMapExtent, max(mipmap_width, mipmap_height));
-		uniform_tx(global.radiance_screenmerge_uMipMapAtlas, mipmaps_surfarray[global.showcascade]);
-	
-		surface_set_target(screen);
-		draw_clear_alpha(c_black, 0);
-		draw_surface(screen_temp, 0.0, 0.0);
-		surface_reset_target();
-		
 		shader_reset();
 	}
 }

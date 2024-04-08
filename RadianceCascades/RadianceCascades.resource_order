@@ -20,7 +20,6 @@
     {"name":"Shd_JumpfloodSeed","order":1,"path":"shaders/Shd_JumpfloodSeed/Shd_JumpfloodSeed.yy",},
     {"name":"Shd_RadianceMipMap","order":6,"path":"shaders/Shd_RadianceMipMap/Shd_RadianceMipMap.yy",},
     {"name":"Shd_DistanceField","order":2,"path":"shaders/Shd_DistanceField/Shd_DistanceField.yy",},
-    {"name":"Shd_RadianceScreenMerge","order":7,"path":"shaders/Shd_RadianceScreenMerge/Shd_RadianceScreenMerge.yy",},
     {"name":"Shd_JumpfloodAlgorithm","order":3,"path":"shaders/Shd_JumpfloodAlgorithm/Shd_JumpfloodAlgorithm.yy",},
     {"name":"Shd_RadianceIntervals","order":4,"path":"shaders/Shd_RadianceIntervals/Shd_RadianceIntervals.yy",},
     {"name":"Spr_SampleScene","order":1,"path":"sprites/Spr_SampleScene/Spr_SampleScene.yy",},

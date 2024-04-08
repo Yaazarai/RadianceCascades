@@ -29,7 +29,7 @@ vec4 cascadeFetch(ProbeTexel info, vec2 texelIndex, float thetaIndex) {
 void main() {
 	// Get the mipmap's cascade texel info based on the cascade being rendered.
 	ProbeTexel probeInfo = cascadeProbeTexel(in_CascadeIndex);
-	vec2 mipmapCoord = floor(vec2(in_TextCoord * in_MipMapExtent));
+	vec2 mipmapCoord = vec2(in_TextCoord * in_MipMapExtent);
 	
 	// Loops through all of the radiance intervals for this mip-map and accumulate.
 	vec4 radiance = vec4(0.0, 0.0, 0.0, 0.0);

@@ -26,6 +26,10 @@ vec4 cascadeFetch(ProbeTexel info, vec2 texelIndex, float thetaIndex) {
 	vec2 probeTexel = texelIndex * info.size;
 	probeTexel += vec2(mod(thetaIndex, info.size), thetaIndex / info.size);
 	vec2 cascadeTexelPosition = probeTexel / in_CascadeExtent;
+	
+	if (cascadeTexelPosition.x < 0.0 || cascadeTexelPosition.y < 0.0 || cascadeTexelPosition.x >= 1.0 || cascadeTexelPosition.y >= 1.0)
+		return vec4(0.0, 0.0, 0.0, 0.0);
+	
 	return texture2D(in_CascadeAtlas, cascadeTexelPosition);
 }
 
@@ -38,8 +42,9 @@ void main() {
 	vec2 texelIndexN1_N = floor((texelIndexN1 * 2.0) + 1.0);
 	
 	vec4 radiance = texture2D(gm_BaseTexture, in_TextCoord);
+	radiance.a = 1.0 - radiance.a;
 	
-	if (radiance.a != 0.0) {
+	if (radiance.a != 0.0 && in_CascadeIndex < in_CascadeCount - 1.0) {
 		vec4 TL = vec4(0.0), TR = vec4(0.0),
 			BL = vec4(0.0), BR = vec4(0.0);
 		
@@ -59,10 +64,9 @@ void main() {
 		// Smoother Weights:
 		vec2 weight = vec2(0.33) + (vec2(probeInfo.probe) - texelIndexN1_N) * vec2(0.33);
 		
-		vec4 interpolated = mix(mix(TL, TR, weight.x), mix(BL, BR, weight.x), weight.y);
-		radiance.rgb += radiance.a * interpolated.rgb;
-		radiance.a *= interpolated.a;
-		radiance.rgb /= branch4;
+		vec4 interpolated = mix(mix(TL, TR, weight.x), mix(BL, BR, weight.x), weight.y) / branch4;
+		interpolated.a = 1.0 - interpolated.a;
+		radiance += radiance.a * interpolated;
 	}
 	
 	gl_FragColor = vec4(radiance.rgb, 1.0);

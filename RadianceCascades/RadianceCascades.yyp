@@ -38,7 +38,6 @@
     {"id":{"name":"Shd_JumpfloodSeed","path":"shaders/Shd_JumpfloodSeed/Shd_JumpfloodSeed.yy",},},
     {"id":{"name":"Shd_RadianceMipMap","path":"shaders/Shd_RadianceMipMap/Shd_RadianceMipMap.yy",},},
     {"id":{"name":"Shd_DistanceField","path":"shaders/Shd_DistanceField/Shd_DistanceField.yy",},},
-    {"id":{"name":"Shd_RadianceScreenMerge","path":"shaders/Shd_RadianceScreenMerge/Shd_RadianceScreenMerge.yy",},},
     {"id":{"name":"Shd_JumpfloodAlgorithm","path":"shaders/Shd_JumpfloodAlgorithm/Shd_JumpfloodAlgorithm.yy",},},
     {"id":{"name":"Shd_RadianceIntervals","path":"shaders/Shd_RadianceIntervals/Shd_RadianceIntervals.yy",},},
     {"id":{"name":"Spr_SampleScene","path":"sprites/Spr_SampleScene/Spr_SampleScene.yy",},},
